@@ -1,0 +1,357 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System Monitor</title>
+
+<style>
+* { box-sizing: border-box; }
+
+:root {
+  --bg: #0b1120;
+  --panel: #151f32;
+  --text: #e5edf8;
+  --muted: #91a1b9;
+  --border: #26344b;
+  --blue: #60a5fa;
+}
+
+body.light {
+  --bg: #edf2f8;
+  --panel: #ffffff;
+  --text: #172033;
+  --muted: #64748b;
+  --border: #d5deeb;
+  --blue: #2563eb;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, sans-serif;
+  transition: .2s;
+}
+
+header {
+  padding: 18px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+header h2 {
+  margin: 0;
+  color: var(--blue);
+  font-size: 19px;
+}
+
+button {
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--panel);
+  color: var(--text);
+}
+
+.layout {
+  display: flex;
+  min-height: calc(100vh - 65px);
+}
+
+aside {
+  width: 165px;
+  flex-shrink: 0;
+  background: var(--panel);
+  padding: 15px 10px;
+  border-right: 1px solid var(--border);
+}
+
+aside button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 9px;
+}
+
+aside button.active {
+  background: var(--blue);
+  color: #07111f;
+}
+
+main {
+  padding: 20px;
+  min-width: 0;
+  flex: 1;
+}
+
+.muted { color: var(--muted); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 0;
+}
+
+.panel h3 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.value {
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.blue { color: var(--blue); }
+.green { color: #22c55e; }
+.orange { color: #fb923c; }
+
+.chart {
+  height: 130px;
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  padding-top: 12px;
+}
+
+.bar {
+  flex: 1;
+  min-width: 0;
+  background: var(--blue);
+  border-radius: 5px 5px 0 0;
+  opacity: .85;
+}
+
+.chart-labels {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 8px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.row:last-child { border: none; }
+
+.progress {
+  height: 7px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 9px;
+}
+
+.fill {
+  height: 100%;
+  background: var(--blue);
+  border-radius: 10px;
+}
+
+.page { display: none; }
+.page.active { display: block; }
+
+footer {
+  margin-top: 25px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media (max-width: 480px) {
+  aside { width: 115px; }
+  main { padding: 12px; }
+  .grid { gap: 8px; }
+  .panel { padding: 11px; }
+  .value { font-size: 21px; }
+  header h2 { font-size: 16px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h2>◈ SYSTEM MONITOR</h2>
+  <button onclick="gantiTema()">◐ Tema</button>
+</header>
+
+<div class="layout">
+
+<aside>
+  <button class="active" onclick="bukaHalaman('overview',this)">▦ Overview</button>
+  <button onclick="bukaHalaman('hardware',this)">▤ Hardware</button>
+  <button onclick="bukaHalaman('aktivitas',this)">◷ Aktivitas</button>
+</aside>
+
+<main>
+
+<section id="overview" class="page active">
+  <h2>Overview</h2>
+  <p class="muted">Ringkasan pemantauan sistem</p>
+
+  <div class="grid">
+    <div class="panel">
+      <h3>CPU Usage</h3>
+      <div class="value blue" id="cpu">32%</div>
+      <div class="progress"><div class="fill" id="cpuBar" style="width:32%"></div></div>
+    </div>
+
+    <div class="panel">
+      <h3>RAM Usage</h3>
+      <div class="value green" id="ram">64%</div>
+      <div class="progress"><div class="fill" id="ramBar" style="width:64%"></div></div>
+    </div>
+
+    <div class="panel">
+      <h3>Suhu</h3>
+      <div class="value orange" id="temp">42°C</div>
+      <p class="muted">Data simulasi</p>
+    </div>
+
+    <div class="panel">
+      <h3>Waktu Lokal</h3>
+      <div class="value" id="clock">--:--:--</div>
+      <p class="muted" id="date"></p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Grafik Aktivitas (simulasi)</h3>
+    <div class="chart" id="chart"></div>
+    <div class="chart-labels">
+      <span>08.00</span><span>10.00</span>
+      <span>12.00</span><span>14.00</span>
+      <span>16.00</span>
+    </div>
+  </div>
+</section>
+
+<section id="hardware" class="page">
+  <h2>Hardware</h2>
+  <p class="muted">Informasi komponen simulasi</p>
+
+  <div class="panel">
+    <div class="row"><span>Prosesor</span><b>CPU</b></div>
+    <div class="row"><span>Memori</span><b>RAM</b></div>
+    <div class="row"><span>Sensor suhu</span><b>Virtual</b></div>
+    <div class="row"><span>Koneksi database</span><b>Belum terhubung</b></div>
+  </div>
+</section>
+
+<section id="aktivitas" class="page">
+  <h2>Aktivitas</h2>
+  <p class="muted">Catatan interaksi dashboard</p>
+
+  <div class="panel" id="logs">
+    <div class="row"><span>Dashboard dimulai</span><span class="green">OK</span></div>
+  </div>
+
+  <button onclick="tambahLog()">+ Tambah catatan</button>
+</section>
+
+<footer>
+  System Monitor v1.0 · Antarmuka demonstrasi
+</footer>
+
+</main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function gantiTema() {
+  document.body.classList.toggle("light");
+  catat("Tema tampilan diubah");
+}
+
+function bukaHalaman(id, tombol) {
+  document.querySelectorAll(".page").forEach(p => {
+    p.classList.remove("active");
+  });
+
+  $(id).classList.add("active");
+
+  document.querySelectorAll("aside button").forEach(b => {
+    b.classList.remove("active");
+  });
+
+  tombol.classList.add("active");
+}
+
+function perbaruiJam() {
+  const sekarang = new Date();
+
+  $("clock").textContent =
+    sekarang.toLocaleTimeString("id-ID");
+
+  $("date").textContent =
+    sekarang.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    });
+}
+
+function buatGrafik() {
+  const chart = $("chart");
+
+  for (let i = 0; i < 12; i++) {
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    bar.style.height = (20 + Math.random() * 80) + "%";
+    chart.appendChild(bar);
+  }
+}
+
+function catat(teks) {
+  const logs = $("logs");
+  const item = document.createElement("div");
+  item.className = "row";
+
+  const waktu = new Date().toLocaleTimeString("id-ID");
+
+  const nama = document.createElement("span");
+  nama.textContent = teks;
+
+  const jam = document.createElement("span");
+  jam.className = "muted";
+  jam.textContent = waktu;
+
+  item.append(nama, jam);
+  logs.prepend(item);
+}
+
+function tambahLog() {
+  catat("Catatan baru ditambahkan");
+}
+
+perbaruiJam();
+setInterval(perbaruiJam, 1000);
+buatGrafik();
+</script>
+
+</body>
+</html>
